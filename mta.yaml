@@ -1,0 +1,77 @@
+ID: northwindcf
+_schema-version: '2.1'
+parameters:
+  deploy_mode: html5-repo
+version: 0.0.1
+modules:
+  - name: northwindcf-approuter
+    type: approuter.nodejs
+    path: northwindcf-approuter
+    parameters:
+      disk-quota: 256M
+      memory: 256M
+    requires:
+      - name: northwindcf_html5_repo_runtime
+      - name: dest_northwindcf
+      - name: uaa_northwindcf
+      - name: portal_resources_northwindcf
+  - name: northwindcf_ui_deployer
+    type: com.sap.html5.application-content
+    path: northwindcf_ui_deployer
+    requires:
+      - name: northwindcf_html5_repo_host
+    build-parameters:
+      requires:
+        - name: ui5
+          artifacts:
+            - './*'
+          target-path: resources/ui5
+  - name: ui5
+    type: html5
+    path: ui5
+    build-parameters:
+      builder: custom
+      commands:
+        - npm install
+        - npm run build
+      supported-platforms: []
+      build-result: dist
+  - name: launchpad
+    type: com.sap.portal.content
+    path: launchpad
+    parameters:
+      stack: cflinuxfs3
+      memory: 128M
+      buildpack: 'https://github.com/cloudfoundry/nodejs-buildpack/releases/download/v1.6.39/nodejs-buildpack-cflinuxfs3-v1.6.39.zip'
+    requires:
+      - name: portal_resources_northwindcf
+      - name: uaa_northwindcf
+      - name: northwindcf_html5_repo_host
+      - name: northwindcf_ui_deployer
+resources:
+  - name: northwindcf_html5_repo_runtime
+    parameters:
+      service-plan: app-runtime
+      service: html5-apps-repo
+    type: org.cloudfoundry.managed-service
+  - name: northwindcf_html5_repo_host
+    parameters:
+      service-plan: app-host
+      service: html5-apps-repo
+    type: org.cloudfoundry.managed-service
+  - name: uaa_northwindcf
+    parameters:
+      path: ./xs-security.json
+      service-plan: application
+      service: xsuaa
+    type: org.cloudfoundry.managed-service
+  - name: dest_northwindcf
+    parameters:
+      service-plan: lite
+      service: destination
+    type: org.cloudfoundry.managed-service
+  - name: portal_resources_northwindcf
+    parameters:
+      service-plan: standard
+      service: portal
+    type: org.cloudfoundry.managed-service

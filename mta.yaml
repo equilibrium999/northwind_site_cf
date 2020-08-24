@@ -15,6 +15,7 @@ modules:
       - name: dest_northwindcf
       - name: uaa_northwindcf
       - name: portal_resources_northwindcf
+      - name: workflow_northwindcf
   - name: northwindcf_ui_deployer
     type: com.sap.html5.application-content
     path: northwindcf_ui_deployer
@@ -48,6 +49,14 @@ modules:
       - name: uaa_northwindcf
       - name: northwindcf_html5_repo_host
       - name: northwindcf_ui_deployer
+      - name: workflow_northwindcf
+  - name: northwind_wf
+    type: com.sap.application.content
+    path: northwind_wf
+    requires:
+      - name: workflow_northwindcf
+        parameters:
+          content-target: true
 resources:
   - name: northwindcf_html5_repo_runtime
     parameters:
@@ -74,4 +83,9 @@ resources:
     parameters:
       service-plan: standard
       service: portal
+    type: org.cloudfoundry.managed-service
+  - name: workflow_northwindcf
+    parameters:
+      service-plan: lite
+      service: workflow
     type: org.cloudfoundry.managed-service
